@@ -1,0 +1,8 @@
+[package]
+name = "CCSDS_Parser"
+version = "0.1.0"
+authors = ["Joe A <jasercion.gwu@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+ccsds_primary_header="0.8.0"
