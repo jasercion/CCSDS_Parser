@@ -5,6 +5,8 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;
 use bytes::Bytes;
+use bytes::BytesMut;
+use core::option::Option;
 use ccsds_primary_header::primary_header::*;
 use ccsds_primary_header::parser::*;
 
@@ -15,9 +17,10 @@ use ccsds_primary_header::parser::*;
 /// header to main in a useful data format
 ///
 
-fn parse_input(bytestream: Bytes) {
+fn parse_input(bytestream: Bytes) -> Option<BytesMut> {
     let mut parser = ccsds_primary_header::parser::CcsdsParser::new();      
     parser.recv_bytes(bytestream);
+    return parser.pull_packet();
 }
     
 
@@ -48,7 +51,9 @@ fn main() -> Result<(), std::io::Error> {
     reader.read_to_end(&mut buffer);
 
     let mem = Bytes::from(buffer);
-    parse_input(mem);
+    let data = parse_input(mem);
+
+    println!("Extracted packet: {:?}", data);
 
     println!("Program terminated sucessfully!");
     Ok(())
