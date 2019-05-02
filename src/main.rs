@@ -1,7 +1,11 @@
 extern crate ccsds_primary_header;
 
 use std::env;
-use std::fs;
+use std::fs::File;
+use std::io::prelude::*;
+use std::io::Error;
+use std::io::BufReader;
+use bytes::Bytes;
 use ccsds_primary_header::primary_header::*;
 use ccsds_primary_header::parser::*;
 
@@ -12,13 +16,11 @@ use ccsds_primary_header::parser::*;
 /// header to main in a useful data format
 ///
 
-fn parseInput(bytestream: &Vec<u8>) {
-    let parser = parser::CcsdsParser.new();    
-    
-    for val in bytestream {
-        parser.recv_bytes(val)
-    };
+fn parseInput(bytestream: Bytes) {
+    let mut parser = ccsds_primary_header::parser::CcsdsParser::new();      
+    parser.recv_bytes(bytestream);
 }
+    
 
 
 /// # main() function
@@ -28,16 +30,27 @@ fn parseInput(bytestream: &Vec<u8>) {
 /// return the parsed header in a useful data format.
 ///
 
-fn main() {
-    let args: Vec<String> = env::args().collect();
+fn main() -> Result<(), std::io::Error> {
+    let args: Vec::<String> = env::args().collect();
     println!("Loading data files {:?}...", args);
 
-    let f = File::open(args[0])?;
-    let mut buffer = Vec<u8>::new();
+    let file = match File::open(&args[0]) {
+        Err(e) => {
+            println!("Error opening file: {}", e);
+            return Ok(());
+        }
+        Ok(f) => f,
+    };
+        
+        
+    let mut reader = BufReader::new(file);
+    let mut buffer = Vec::<u8>::new();
 
-    f.read_to_end(&mut buffer)?;
+    reader.read_to_end(&mut buffer);
 
-    parseInput(&buffer);
+    let mut mem = Bytes::from(buffer);
+    parseInput(mem);
 
-    println!("Program terminated sucessfully!")
+    println!("Program terminated sucessfully!");
+    Ok(())
 }
