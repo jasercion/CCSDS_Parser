@@ -21,9 +21,11 @@ fn parse_input(bytestream: Bytes) -> Option<BytesMut> {
 
     let header = parser.current_header().unwrap();
     
-    println!("Primary Header: {:?}", header);
+    println!("Primary Header Information: \n");
+    println!("CCSDS Version: {:?}", header.control.version());
+    println!("Packet Type: {:?}", header.control.packet_type());
     println!("apid: {:?}", header.control.apid());
-    
+    println!("Secondary header? {:?}\n", header.control.secondary_header_flag());
     return parser.pull_packet();
 }
     
@@ -38,7 +40,7 @@ fn parse_input(bytestream: Bytes) -> Option<BytesMut> {
 
 fn main() -> Result<(), std::io::Error> {
     let args: Vec<String> = env::args().collect();
-    println!("Loading data files {:?}...", args);
+    println!("Loading data files {:?}...\n", args);
 
     let file = match File::open(&args[0]) {
         Err(e) => {
