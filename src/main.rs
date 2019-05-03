@@ -20,6 +20,12 @@ use ccsds_primary_header::parser::*;
 fn parse_input(bytestream: Bytes) -> Option<BytesMut> {
     let mut parser = ccsds_primary_header::parser::CcsdsParser::new();      
     parser.recv_bytes(bytestream);
+
+    let header = parser.current_header().unwrap();
+    
+    println!("Primary Header: {:?}", header);
+    println!("apid: {:?}", header.control.apid());
+    
     return parser.pull_packet();
 }
     
