@@ -7,8 +7,6 @@ use std::io::BufReader;
 use bytes::Bytes;
 use bytes::BytesMut;
 use core::option::Option;
-use ccsds_primary_header::primary_header::*;
-use ccsds_primary_header::parser::*;
 
 /// # parse_input() function
 /// `parse_input()` should accept an object representing a
