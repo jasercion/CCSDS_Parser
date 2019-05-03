@@ -1,6 +1,7 @@
 extern crate ccsds_primary_header;
 
 use std::env;
+use std::str;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;
@@ -22,10 +23,22 @@ fn parse_input(bytestream: Bytes) -> Option<BytesMut> {
     let header = parser.current_header().unwrap();
     
     println!("Primary Header Information: \n");
+
+    println!("Control Data");
     println!("CCSDS Version: {:?}", header.control.version());
     println!("Packet Type: {:?}", header.control.packet_type());
     println!("apid: {:?}", header.control.apid());
     println!("Secondary header? {:?}\n", header.control.secondary_header_flag());
+
+    println!("Sequence Data");
+    println!("Sequence Type: {:?}", header.sequence.sequence_type());
+    println!("Sequence Count: {:?}\n", header.sequence.sequence_count());
+   
+    println!("Length Data");
+    println!("Length Field: {:?}\n", header.length.length_field());
+
+    println!("Endianness: {:?}\n", header.endianness);
+             
     return parser.pull_packet();
 }
     
@@ -57,9 +70,9 @@ fn main() -> Result<(), std::io::Error> {
     reader.read_to_end(&mut buffer)?;
 
     let mem = Bytes::from(buffer);
-    let data = parse_input(mem);
+    let data = parse_input(mem).unwrap();
 
-    println!("Extracted packet: {:?}", data);
+    println!("Extracted packet: {:?}", str::from_utf8(&data).unwrap());
 
     println!("Program terminated sucessfully!");
     Ok(())
