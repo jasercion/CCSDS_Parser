@@ -52,7 +52,7 @@ fn main() -> Result<(), std::io::Error> {
     let mut reader = BufReader::new(file);
     let mut buffer = Vec::<u8>::new();
 
-    reader.read_to_end(&mut buffer);
+    reader.read_to_end(&mut buffer)?;
 
     let mem = Bytes::from(buffer);
     let data = parse_input(mem);
