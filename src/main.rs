@@ -19,45 +19,37 @@ fn parse_input(bytestream: Bytes) -> ccsds_primary_header::parser::CcsdsParser {
     parser.recv_bytes(bytestream);
 
     let header = parser.current_header().unwrap();
-    
-    println!("Primary Header Information: \n");
-
-    println!("Control Data");
-    println!("CCSDS Version: {:?}", header.control.version());
-    println!("Packet Type: {:?}", header.control.packet_type());
-    println!("apid: {:?}", header.control.apid());
-    println!("Secondary header? {:?}\n", header.control.secondary_header_flag());
-
-    println!("Sequence Data");
-    println!("Sequence Type: {:?}", header.sequence.sequence_type());
-    println!("Sequence Count: {:?}\n", header.sequence.sequence_count());
-   
-    println!("Length Data");
-    println!("Length Field: {:?}\n", header.length.length_field());
-
-    println!("Endianness: {:?}\n", header.endianness);
-             
+                 
     return parser;
 }
     
-fn read_header(header: &ccsds_primary_header::primary_header::CcsdsPrimaryHeader) {
+fn read_header(header: &ccsds_primary_header::primary_header::CcsdsPrimaryHeader, strbuf: &mut String) {
 
-    println!("Primary Header Information: \n");
+    strbuf.push_str("#####################\n)");
+    
+    strbuf = strbuf + format!("# Packet Type: {:?} # APID: {:?} # Secondary Header?: {:?} # \n",
+                    header.control.packet_type(), header.control.apid(), header.control.secondary_header_flag());
 
-    println!("Control Data");
-    println!("CCSDS Version: {:?}", header.control.version());
-    println!("Packet Type: {:?}", header.control.packet_type());
-    println!("apid: {:?}", header.control.apid());
-    println!("Secondary header? {:?}\n", header.control.secondary_header_flag());
+    strbuf = strbuf + format!("# Sequence Type: {:?} # Sequence Count: {:?} # Length Field: {:?} # \n",
+                    header.sequence.sequence_type(), header.sequence.sequence_count(), header.length.length_field());
+    
+    strbuf.push_str("#####################\n)");
+    // println!("Primary Header Information: \n");
 
-    println!("Sequence Data");
-    println!("Sequence Type: {:?}", header.sequence.sequence_type());
-    println!("Sequence Count: {:?}\n", header.sequence.sequence_count());
+    // println!("Control Data");
+    // println!("CCSDS Version: {:?}", header.control.version());
+    // println!("Packet Type: {:?}", header.control.packet_type());
+    // println!("apid: {:?}", header.control.apid());
+    // println!("Secondary header? {:?}\n", header.control.secondary_header_flag());
 
-    println!("Length Data");
-    println!("Length Field: {:?}\n", header.length.length_field());
+    // println!("Sequence Data");
+    // println!("Sequence Type: {:?}", header.sequence.sequence_type());
+    // println!("Sequence Count: {:?}\n", header.sequence.sequence_count());
 
-    println!("Endianness: {:?}\n", header.endianness);
+    // println!("Length Data");
+    // println!("Length Field: {:?}\n", header.length.length_field());
+
+    // println!("Endianness: {:?}\n", header.endianness);
 
 }
 
@@ -95,6 +87,8 @@ fn main() -> Result<(), std::io::Error> {
     // stream.
     let mut data = parse_input(mem);
 
+    let mut output = String::new();
+
     println!("Extracted packet: {:?}\n", str::from_utf8(&data.pull_packet().expect("Packet pull failed!")).unwrap());
 
     loop {
@@ -107,9 +101,13 @@ fn main() -> Result<(), std::io::Error> {
             //    Ok(_str) => println!("{:?}\n", _str),
             //    Err(e) => println!("UTF-8 conversion failed for packet: {:?}", e),
             //}
-            read_header(&data.current_header().unwrap());
+            read_header(&data.current_header().unwrap(), &output);
         }
     };
+
+    let mut o = File::create(format!("{}.txt",&args[0]));
+
+    o.write_all(output.as_bytes);
     println!("Program terminated sucessfully!");
     Ok(())   
 }
