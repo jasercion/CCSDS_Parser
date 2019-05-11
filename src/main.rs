@@ -40,6 +40,26 @@ fn parse_input(bytestream: Bytes) -> ccsds_primary_header::parser::CcsdsParser {
     return parser;
 }
     
+fn read_header(header: &ccsds_primary_header::primary_header::CcsdsPrimaryHeader) {
+
+    println!("Primary Header Information: \n");
+
+    println!("Control Data");
+    println!("CCSDS Version: {:?}", header.control.version());
+    println!("Packet Type: {:?}", header.control.packet_type());
+    println!("apid: {:?}", header.control.apid());
+    println!("Secondary header? {:?}\n", header.control.secondary_header_flag());
+
+    println!("Sequence Data");
+    println!("Sequence Type: {:?}", header.sequence.sequence_type());
+    println!("Sequence Count: {:?}\n", header.sequence.sequence_count());
+
+    println!("Length Data");
+    println!("Length Field: {:?}\n", header.length.length_field());
+
+    println!("Endianness: {:?}\n", header.endianness);
+
+}
 
 
 /// # main() function
@@ -83,10 +103,11 @@ fn main() -> Result<(), std::io::Error> {
             println!("End of data reached!");
             break;
         } else {
-            match str::from_utf8(&pulled.clone().unwrap()) {
-                Ok(_str) => println!("{:?}\n", _str),
-                Err(e) => println!("UTF-8 conversion failed for packet: {:?}", e),
-            }
+            //match str::from_utf8(&pulled.clone().unwrap()) {
+            //    Ok(_str) => println!("{:?}\n", _str),
+            //    Err(e) => println!("UTF-8 conversion failed for packet: {:?}", e),
+            //}
+            read_header(&data.current_header().unwrap());
         }
     };
     println!("Program terminated sucessfully!");
