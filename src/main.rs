@@ -6,8 +6,6 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;
 use bytes::Bytes;
-use bytes::BytesMut;
-use core::option::Option;
 
 /// # parse_input() function
 /// `parse_input()` should accept an object representing a
@@ -16,7 +14,7 @@ use core::option::Option;
 /// header to main in a useful data format
 ///
 
-fn parse_input(bytestream: Bytes) -> Option<BytesMut> {
+fn parse_input(bytestream: Bytes) -> ccsds_primary_header::parser::CcsdsParser {
     let mut parser = ccsds_primary_header::parser::CcsdsParser::new();      
     parser.recv_bytes(bytestream);
 
@@ -39,7 +37,7 @@ fn parse_input(bytestream: Bytes) -> Option<BytesMut> {
 
     println!("Endianness: {:?}\n", header.endianness);
              
-    return parser.pull_packet();
+    return parser;
 }
     
 
@@ -70,10 +68,27 @@ fn main() -> Result<(), std::io::Error> {
     reader.read_to_end(&mut buffer)?;
 
     let mem = Bytes::from(buffer);
-    let data = parse_input(mem).unwrap();
 
-    println!("Extracted packet: {:?}", str::from_utf8(&data).unwrap());
+    // Call Parse input to return a parser loaded with
+    // the passed byte string.  Parser object can then
+    // be manipulated to retrive data from the packaged
+    // stream.
+    let mut data = parse_input(mem);
 
+    println!("Extracted packet: {:?}\n", str::from_utf8(&data.pull_packet().expect("Packet pull failed!")).unwrap());
+
+    loop {
+        let pulled = &data.pull_packet(); 
+        if pulled.is_some() == false {
+            println!("End of data reached!");
+            break;
+        } else {
+            match str::from_utf8(&pulled.clone().unwrap()) {
+                Ok(_str) => println!("{:?}\n", _str),
+                Err(e) => println!("UTF-8 conversion failed for packet: {:?}", e),
+            }
+        }
+    };
     println!("Program terminated sucessfully!");
-    Ok(())
+    Ok(())   
 }
