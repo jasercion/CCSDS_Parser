@@ -55,7 +55,9 @@ fn main() -> Result<(), std::io::Error> {
     let args: Vec<String> = env::args().collect();
     println!("Loading data files {:?}...\n", args);
 
-    let mut file = match File::open(&args[0]) {
+    println!("Initial Arg: {:?}",&args[1]);
+    
+    let mut file = match File::open(&args[1]) {
         Err(e) => {
             println!("Error opening file: {}", e);
             return Ok(());
@@ -84,9 +86,9 @@ fn main() -> Result<(), std::io::Error> {
     // file.  Filename should be the name of the input file
     // with the suffix '.txt'
 
-    let filename = format!("{}",&args[0]);
+    let filename = format!("{}",&args[1]);
     println!("Filename is: {}",filename);
-    let mut outfile = File::create(filename.trim_end_matches(".*").to_owned()+".txt").unwrap();
+    let mut outfile = File::create(filename.trim_end_matches(".dat").to_owned()+".txt").unwrap();
     
     // Call Parse input to return a parser loaded with
     // the passed byte string.  Parser object can then
