@@ -22,21 +22,44 @@ fn parse_input(bytestream: bytes::Bytes) -> ccsds_primary_header::parser::CcsdsP
     return parser;
 }
     
-fn read_header(header: &ccsds_primary_header::primary_header::CcsdsPrimaryHeader) -> String {
+fn read_packet(header: &ccsds_primary_header::primary_header::CcsdsPrimaryHeader) -> String {
 
+    // This string will act as a buffer to hold all text
+    // to be written to the output file
+    
     let mut stringbuf = String::new();
+
+    // Write out header information to the string buffer
+    // then pass the header reference to the byte parser
+    // to extract the packet data.
     
     stringbuf.push_str("#####################\n");
     
     stringbuf = stringbuf + format!("# Packet Type: {:?} # APID: {:?} # Secondary Header?: {:?} # \n",
                     header.control.packet_type(), header.control.apid(), header.control.secondary_header_flag()).as_str();
 
-    stringbuf = stringbuf + format!("# Sequence Type: {:?} # Sequence Count: {:?} # Length Field: {:?} # \n",
+    stringbuf = stringbuf + format!("# Sequence Type: {:?} # Sequence Count: {:?} # Length Field: {:?} # \n\n",
                     header.sequence.sequence_type(), header.sequence.sequence_count(), header.length.length_field()).as_str();
+
+    let packetcontents = parse_packet(header);
     
     stringbuf.push_str("#####################\n\n");
 
     return stringbuf;
+}
+
+fn parse_packet(header: &ccsds_primary_header::primary_header::CcsdsPrimaryHeader) -> String {
+
+    // Structure of a Space Packet (From the CCSDS Blue Book):
+    // Header:  Secondary Header:  User Data Field:
+    // 6 bytes  Variable           Variable
+    // 6 bytes guaranteed for header, between 1 and 65536 bytes
+    // Can be provided for the Secondary Header and User Data
+    // Fields combined (these make up the Packet Data Field)
+    // The Packet Data Field MUST be at least 1 byte long,
+    // therefore the CCSDS chose to make the data field
+    // 1-indexed as opposed to 0-indexed.
+    
 }
 
 
@@ -102,7 +125,7 @@ fn main() -> Result<(), std::io::Error> {
     
     let mut output = String::new();
 
-    // This loop calls read_header() and pushs the results to the
+    // This loop calls read_packet() and pushs the results to the
     // output string.  Loop termination occurs when there are no
     // more packets to pull.
     
@@ -112,7 +135,7 @@ fn main() -> Result<(), std::io::Error> {
             println!("End of data reached!");
             break;
         } else {
-            output.push_str(read_header(&data.current_header().unwrap()).as_str());
+            output.push_str(read_packet(&data.current_header().unwrap()).as_str());
         }
     };
 
