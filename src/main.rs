@@ -34,7 +34,7 @@ fn read_header(header: &ccsds_primary_header::primary_header::CcsdsPrimaryHeader
     stringbuf = stringbuf + format!("# Sequence Type: {:?} # Sequence Count: {:?} # Length Field: {:?} # \n",
                     header.sequence.sequence_type(), header.sequence.sequence_count(), header.length.length_field()).as_str();
     
-    stringbuf.push_str("#####################\n");
+    stringbuf.push_str("#####################\n\n");
 
     return stringbuf;
 }
